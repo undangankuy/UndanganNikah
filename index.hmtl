@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Undangan Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      height: 100vh;
+      background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.7)),
+      url('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .overlay-box {
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 40px 30px;
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      animation: fadeUp 1.2s ease;
+    }
+
+    .small-text {
+      letter-spacing: 4px;
+      font-size: 12px;
+      opacity: .8;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 64px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .guest {
+      margin-top: 18px;
+      font-size: 15px;
+      opacity: .85;
+    }
+
+    .guest-name {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .btn {
+      margin-top: 28px;
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      background: white;
+      color: black;
+      font-weight: 600;
+      transition: .3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    section {
+      padding: 80px 24px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .couple {
+      max-width: 1000px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: #181818;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .card img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .card-content h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .event-box {
+      max-width: 700px;
+      margin: auto;
+      background: #181818;
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .time-box {
+      width: 90px;
+      height: 90px;
+      background: #222;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .time-box span {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .gallery {
+      max-width: 1100px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 14px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: .7;
+    }
+
+    audio {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media(max-width:600px) {
+      h1 {
+        font-size: 48px;
+      }
+
+      .section-title h2 {
+        font-size: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="overlay-box">
+      <div class="small-text">JASA PEMBUATAN UNDANGAN DIGITAL</div>
+      <h1>Undangankuy</h1>
+
+      <div class="guest" style="margin-top:20px; line-height:1.8;">
+        Bikin undangan digital premium,
+        aesthetic, modern, dan bisa custom nama tamu otomatis.
+      </div>
+
+      <a href="https://wa.me/6283138575587" class="btn" target="_blank">
+        Hubungi WhatsApp
+      </a>
+
+      <div style="margin-top:28px; opacity:.85; font-size:15px;">
+        📱 WA: 083138575587
+      </div>
+
+      <div style="margin-top:10px; opacity:.85; font-size:15px;">
+        📸 IG: @Sgn_prod
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
