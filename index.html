@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Undangan Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      height: 100vh;
+      background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.7)),
+      url('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .overlay-box {
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 40px 30px;
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      animation: fadeUp 1.2s ease;
+    }
+
+    .small-text {
+      letter-spacing: 4px;
+      font-size: 12px;
+      opacity: .8;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 64px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .guest {
+      margin-top: 18px;
+      font-size: 15px;
+      opacity: .85;
+    }
+
+    .guest-name {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .btn {
+      margin-top: 28px;
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      background: white;
+      color: black;
+      font-weight: 600;
+      transition: .3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    section {
+      padding: 80px 24px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .couple {
+      max-width: 1000px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: #181818;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .card img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .card-content h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .event-box {
+      max-width: 700px;
+      margin: auto;
+      background: #181818;
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .time-box {
+      width: 90px;
+      height: 90px;
+      background: #222;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .time-box span {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .gallery {
+      max-width: 1100px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 14px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: .7;
+    }
+
+    audio {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media(max-width:600px) {
+      h1 {
+        font-size: 48px;
+      }
+
+      .section-title h2 {
+        font-size: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <audio autoplay loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mp3">
+  </audio>
+
+  <section class="hero">
+    <div class="overlay-box">
+      <div class="small-text">THE WEDDING OF</div>
+      <h1>Julian <br>&<br> Nur</h1>
+
+      <div class="guest">
+        Kepada Yth.
+      </div>
+      <div class="guest-name" id="guestName">
+        Tamu Undangan
+      </div>
+
+      <a href="#content" class="btn">Buka Undangan</a>
+    </div>
+  </section>
+
+  <section id="content">
+    <div class="section-title">
+      <h2>Pasangan Mempelai</h2>
+      <p>Dengan penuh rasa syukur kami mengundang Anda untuk hadir di hari bahagia kami.</p>
+    </div>
+
+    <div class="couple">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-content">
+          <h3>Julian</h3>
+          <p>Putra Pertama dari Keluarga Bapak Lorem & Ibu Ipsum</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1200&auto=format&fit=crop">
+        <div class="card-content">
+          <h3>Nur</h3>
+          <p>Putri Pertama dari Keluarga Bapak Lorem & Ibu Ipsum</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2>Save The Date</h2>
+    </div>
+
+    <div class="event-box">
+      <h3 style="font-size:32px;margin-bottom:14px;">📅 Minggu, 20 Desember 2026</h3>
+      <p>📍 Grand Ballroom Jakarta</p>
+
+      <div class="countdown">
+        <div class="time-box">
+          <span id="days">0</span>
+          Hari
+        </div>
+
+        <div class="time-box">
+          <span id="hours">0</span>
+          Jam
+        </div>
+
+        <div class="time-box">
+          <span id="minutes">0</span>
+          Menit
+        </div>
+
+        <div class="time-box">
+          <span id="seconds">0</span>
+          Detik
+        </div>
+      </div>
+
+      <a class="btn" style="margin-top:30px" target="_blank" href="https://maps.google.com">
+        Lihat Lokasi
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2>Galeri</h2>
+    </div>
+
+    <div class="gallery">
+      <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1200&auto=format&fit=crop">
+      <img src="https://images.unsplash.com/photo-1525258946800-98cfd641d0de?q=80&w=1200&auto=format&fit=crop">
+      <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1200&auto=format&fit=crop">
+      <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop">
+    </div>
+  </section>
+
+  <div class="footer">
+    Terima kasih atas doa dan kehadirannya ❤️
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const to = params.get('to');
+
+    if(to){
+      document.getElementById('guestName').innerText = decodeURIComponent(to.replace(/\+/g, ' '));
+    }
+
+    const targetDate = new Date('2026-12-20T09:00:00').getTime();
+
+    setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById('days').innerText = days;
+      document.getElementById('hours').innerText = hours;
+      document.getElementById('minutes').innerText = minutes;
+      document.getElementById('seconds').innerText = seconds;
+    }, 1000);
+  </script>
+
+</body>
+</html>
