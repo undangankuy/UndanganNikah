@@ -16,7 +16,7 @@
 
     /* COVER */
     #cover{
-      min-height:100svh; background:var(--dark);
+      min-height:100svh;background:var(--dark);
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       text-align:center;position:relative;overflow:hidden;padding:30px 20px;
     }
@@ -40,8 +40,9 @@
     .cover-guest-box strong{font-size:16px;color:white;font-weight:500;}
     .open-btn{margin-top:28px;display:inline-block;padding:14px 36px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:white;border-radius:100px;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(181,136,62,.4);transition:.3s;}
     .open-btn:hover{transform:translateY(-3px);}
+    .open-btn:active{transform:translateY(0);}
 
-    /* MUSIC TOGGLE */
+    /* MUSIC */
     #musicBtn{
       position:fixed;bottom:20px;right:18px;z-index:200;
       width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
@@ -53,7 +54,6 @@
     #musicBtn.playing::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gold-l);animation:pulse 1.8s infinite;}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0;transform:scale(1.3);}}
 
-    /* MAIN */
     #main{display:none;}
 
     section{padding:60px 18px;max-width:680px;margin:0 auto;}
@@ -104,7 +104,7 @@
     /* gallery */
     .gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
     @media(max-width:420px){.gal-grid{grid-template-columns:repeat(2,1fr);}}
-    .gal-grid img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;}
+    .gal-grid img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;background:var(--warm);}
     .gal-grid img:first-child{grid-column:1/-1;aspect-ratio:16/7;}
 
     /* wishes */
@@ -164,13 +164,12 @@
 </div>
 
 <!-- MUSIC -->
-<button id="musicBtn" onclick="toggleMusic()" title="Musik">🎵</button>
-<audio id="bgAudio" loop></audio>
+<button id="musicBtn" onclick="toggleMusic()" title="Musik" style="display:none;">🎵</button>
+<audio id="bgAudio" loop preload="none"></audio>
 
 <!-- MAIN -->
 <div id="main">
 
-  <!-- QUOTE -->
   <section class="fade-in">
     <div class="quote-block">
       <p id="quoteText">Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.</p>
@@ -178,7 +177,6 @@
     </div>
   </section>
 
-  <!-- COUPLE -->
   <section class="fade-in">
     <div class="sl">
       <div class="eye">Mempelai</div>
@@ -208,7 +206,6 @@
     </div>
   </section>
 
-  <!-- EVENTS -->
   <section class="fade-in">
     <div class="sl">
       <div class="eye">Rangkaian Acara</div>
@@ -226,7 +223,7 @@
         <div>
           <h3>Akad Nikah</h3>
           <p id="akadInfo">Belum diisi</p>
-          <a class="maps-btn" id="mapsLink" href="#" target="_blank">📍 Lihat Lokasi</a>
+          <a class="maps-btn" id="mapsLink" href="#" target="_blank" style="display:none;">📍 Lihat Lokasi</a>
         </div>
       </div>
       <div class="event-card">
@@ -239,7 +236,6 @@
     </div>
   </section>
 
-  <!-- GALLERY -->
   <section class="fade-in" id="galSec" style="display:none">
     <div class="sl">
       <div class="eye">Momen Kami</div>
@@ -248,7 +244,6 @@
     <div class="gal-grid" id="galGrid"></div>
   </section>
 
-  <!-- WISHES -->
   <section class="fade-in">
     <div class="sl">
       <div class="eye">Do'a &amp; Ucapan</div>
@@ -262,7 +257,6 @@
     <div class="wish-list" id="wishList"></div>
   </section>
 
-  <!-- CLOSING -->
   <section class="fade-in" style="text-align:center">
     <div class="sl">
       <h2>Terima Kasih</h2>
@@ -279,225 +273,262 @@
 </div>
 
 <script>
-  // ── PARSE DATA FROM URL HASH ──
-  // Priority: URL hash (#data=...) > localStorage (fallback for same device)
-  function parseHashParams(hash) {
+// ── PARSE URL HASH ──
+// Safely decode URL hash parameters, handling edge cases in mobile browsers
+function parseHash() {
+  try {
+    // Use location.hash — reliable across all mobile browsers
+    let hash = window.location.hash;
+    if (!hash || hash.length < 2) return {};
+    
+    // Remove leading #
+    hash = hash.slice(1);
+    
     const params = {};
-    if (!hash || hash.length < 2) return params;
-    const str = hash.startsWith('#') ? hash.slice(1) : hash;
-    str.split('&').forEach(part => {
-      const [key, ...rest] = part.split('=');
-      if (key) params[decodeURIComponent(key)] = rest.join('=');
-    });
+    // Split by & but be careful: base64 may not contain & but let's be safe
+    // Find first occurrence of 'data=' and treat rest carefully
+    const dataMatch = hash.match(/(?:^|&)data=([^]*?)(?=&to=|$)/);
+    const toMatch   = hash.match(/(?:^|&)to=([^&]*)/);
+    
+    if (dataMatch && dataMatch[1]) params.data = dataMatch[1];
+    if (toMatch   && toMatch[1])   params.to   = decodeURIComponent(toMatch[1].replace(/\+/g,' '));
+    
     return params;
+  } catch(e) {
+    console.warn('parseHash error:', e);
+    return {};
   }
+}
 
-  const hashParams = parseHashParams(location.hash);
-  let d = {};
+// ── LOAD DATA ──
+let d = {};
 
-  if (hashParams.data) {
+(function loadData() {
+  const params = parseHash();
+  
+  if (params.data) {
     try {
-      const json = decodeURIComponent(escape(atob(hashParams.data)));
+      // Decode base64 → URI decode → JSON
+      const json = decodeURIComponent(escape(atob(params.data)));
       d = JSON.parse(json);
-      // Save to localStorage for wishes persistence on same device
-      try { localStorage.setItem('weddingData', JSON.stringify(d)); } catch(e) {}
-    } catch(e) {
-      console.warn('Failed to parse URL data, falling back to localStorage');
-      try { d = JSON.parse(localStorage.getItem('weddingData') || '{}'); } catch(e2) { d = {}; }
-    }
-  } else {
-    // Fallback: read from localStorage (same-device use)
-    try { d = JSON.parse(localStorage.getItem('weddingData') || '{}'); } catch(e) { d = {}; }
-  }
-
-  // Guest name
-  const guestParam = hashParams.to;
-  if (guestParam) {
-    document.getElementById('guestName').textContent = decodeURIComponent(guestParam.replace(/\+/g,' '));
-  }
-
-  const f = s => s || '';
-
-  // Update page title
-  if (d.groomNickname && d.brideNickname) {
-    document.title = `Undangan Pernikahan ${d.groomNickname} & ${d.brideNickname}`;
-  }
-
-  // Cover
-  if (d.groomNickname) document.getElementById('covGroom').textContent = d.groomNickname;
-  if (d.brideNickname) document.getElementById('covBride').textContent = d.brideNickname;
-  if (d.resepsiDate) {
-    const dt = new Date(d.resepsiDate);
-    document.getElementById('covDate').textContent = dt.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  }
-
-  // Quote
-  if (d.quoteText) document.getElementById('quoteText').textContent = d.quoteText;
-  if (d.quoteSource) document.getElementById('quoteSource').textContent = '— ' + d.quoteSource;
-
-  // Groom
-  if (d.groomNickname) document.getElementById('groomNick').textContent = d.groomNickname;
-  if (d.groomName) document.getElementById('groomFull').textContent = d.groomName;
-  if (d.groomChild) document.getElementById('groomChildOf').textContent = d.groomChild;
-  if (d.groomFather || d.groomMother) document.getElementById('groomParents').innerHTML = f(d.groomFather) + (d.groomFather && d.groomMother ? '<br>' : '') + f(d.groomMother);
-  if (d.groomPhoto) {
-    const w = document.getElementById('groomPhWrap');
-    w.outerHTML = `<img class="photo" src="${d.groomPhoto}" alt="">`;
-  }
-
-  // Bride
-  if (d.brideNickname) document.getElementById('brideNick').textContent = d.brideNickname;
-  if (d.brideName) document.getElementById('brideFull').textContent = d.brideName;
-  if (d.brideChild) document.getElementById('brideChildOf').textContent = d.brideChild;
-  if (d.brideFather || d.brideMother) document.getElementById('brideParents').innerHTML = f(d.brideFather) + (d.brideFather && d.brideMother ? '<br>' : '') + f(d.brideMother);
-  if (d.bridePhoto) {
-    const w = document.getElementById('bridePhWrap');
-    w.outerHTML = `<img class="photo" src="${d.bridePhoto}" alt="">`;
-  }
-
-  // Events
-  function fmtDate(s) {
-    if (!s) return '';
-    const dt = new Date(s);
-    return dt.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  }
-  function fmtTime(s) {
-    if (!s) return '';
-    const [h, m] = s.split(':');
-    return h + ':' + m + ' WIB';
-  }
-  if (d.akadDate || d.akadPlace) document.getElementById('akadInfo').innerHTML = fmtDate(d.akadDate) + (d.akadTime?' · '+fmtTime(d.akadTime):'') + (d.akadPlace?'<br>'+f(d.akadPlace):'');
-  if (d.resepsiDate || d.resepsiPlace) document.getElementById('resepsiInfo').innerHTML = fmtDate(d.resepsiDate) + (d.resepsiTime?' · '+fmtTime(d.resepsiTime):'') + (d.resepsiPlace?'<br>'+f(d.resepsiPlace):'');
-  if (d.mapsUrl) document.getElementById('mapsLink').href = d.mapsUrl;
-
-  // Gallery
-  if (d.gallery && d.gallery.some(Boolean)) {
-    const grid = document.getElementById('galGrid');
-    d.gallery.filter(Boolean).forEach(src => {
-      const img = document.createElement('img');
-      img.src = src; img.alt = '';
-      grid.appendChild(img);
-    });
-    document.getElementById('galSec').style.display = '';
-  }
-
-  // Closing
-  if (d.closingMessage) document.getElementById('closingMsg').textContent = d.closingMessage;
-  if (d.groomNickname && d.brideNickname) document.getElementById('footerNames').innerHTML = d.groomNickname + ' &amp; ' + d.brideNickname;
-
-  // ── COUNTDOWN ──
-  const targetStr = d.resepsiDate ? `${d.resepsiDate}T${d.resepsiTime||'09:00'}:00` : '2026-12-20T09:00:00';
-  const target = new Date(targetStr).getTime();
-  setInterval(() => {
-    const diff = target - Date.now();
-    if (diff < 0) {
-      ['cD','cH','cM','cS'].forEach(id => document.getElementById(id).textContent = '0');
+      // Cache locally for wishes key
+      try { localStorage.setItem('weddingData_v2', JSON.stringify(d)); } catch(e) {}
       return;
-    }
-    document.getElementById('cD').textContent = Math.floor(diff / 86400000);
-    document.getElementById('cH').textContent = Math.floor((diff % 86400000) / 3600000);
-    document.getElementById('cM').textContent = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('cS').textContent = Math.floor((diff % 60000) / 1000);
-  }, 1000);
-
-  // ── MUSIC ──
-  // Supports custom URL from editor
-  const audio = document.getElementById('bgAudio');
-  const musicBtn = document.getElementById('musicBtn');
-  let musicPlaying = false;
-  let musicReady = false;
-
-  function initMusic() {
-    // Use custom music URL if provided
-    const musicUrl = d.musicUrl && d.musicUrl.trim();
-    if (!musicUrl) return;
-
-    audio.src = musicUrl;
-    audio.crossOrigin = 'anonymous'; // Allow cross-origin audio
-    musicBtn.style.display = 'flex';
-
-    // Try autoplay
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        musicPlaying = true;
-        musicReady = true;
-        musicBtn.classList.add('playing');
-        musicBtn.textContent = '🎵';
-      }).catch(() => {
-        // Autoplay blocked (common on mobile) - show play button
-        musicReady = true;
-        musicBtn.textContent = '▶';
-        musicBtn.title = 'Putar Musik';
-      });
+    } catch(e) {
+      console.warn('URL data decode failed, trying localStorage fallback:', e);
     }
   }
+  
+  // Fallback: localStorage (same device)
+  try {
+    const raw = localStorage.getItem('weddingData_v2');
+    if (raw) d = JSON.parse(raw);
+  } catch(e) { d = {}; }
+})();
 
-  function toggleMusic() {
-    if (!musicReady) return;
-    if (musicPlaying) {
-      audio.pause();
+// ── APPLY DATA ──
+const f = s => s || '';
+
+// Guest
+const params = parseHash();
+if (params.to) {
+  document.getElementById('guestName').textContent = params.to;
+}
+
+// Title
+if (d.groomNickname && d.brideNickname) {
+  document.title = `Undangan – ${d.groomNickname} & ${d.brideNickname}`;
+}
+
+// Cover
+if (d.groomNickname) document.getElementById('covGroom').textContent = d.groomNickname;
+if (d.brideNickname) document.getElementById('covBride').textContent = d.brideNickname;
+if (d.resepsiDate) {
+  document.getElementById('covDate').textContent = new Date(d.resepsiDate)
+    .toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+// Quote
+if (d.quoteText)   document.getElementById('quoteText').textContent   = d.quoteText;
+if (d.quoteSource) document.getElementById('quoteSource').textContent = '— ' + d.quoteSource;
+
+// Groom
+if (d.groomNickname) document.getElementById('groomNick').textContent = d.groomNickname;
+if (d.groomName)     document.getElementById('groomFull').textContent = d.groomName;
+if (d.groomChild)    document.getElementById('groomChildOf').textContent = d.groomChild;
+if (d.groomFather || d.groomMother)
+  document.getElementById('groomParents').innerHTML = f(d.groomFather) + (d.groomFather && d.groomMother ? '<br>' : '') + f(d.groomMother);
+if (d.groomPhoto) {
+  document.getElementById('groomPhWrap').outerHTML =
+    `<img class="photo" src="${d.groomPhoto}" alt="Mempelai Pria" loading="lazy">`;
+}
+
+// Bride
+if (d.brideNickname) document.getElementById('brideNick').textContent = d.brideNickname;
+if (d.brideName)     document.getElementById('brideFull').textContent = d.brideName;
+if (d.brideChild)    document.getElementById('brideChildOf').textContent = d.brideChild;
+if (d.brideFather || d.brideMother)
+  document.getElementById('brideParents').innerHTML = f(d.brideFather) + (d.brideFather && d.brideMother ? '<br>' : '') + f(d.brideMother);
+if (d.bridePhoto) {
+  document.getElementById('bridePhWrap').outerHTML =
+    `<img class="photo" src="${d.bridePhoto}" alt="Mempelai Wanita" loading="lazy">`;
+}
+
+// Events
+function fmtDate(s){
+  if(!s) return '';
+  return new Date(s).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function fmtTime(s){
+  if(!s) return '';
+  const [h,m]=s.split(':'); return h+':'+m+' WIB';
+}
+if (d.akadDate || d.akadPlace) {
+  document.getElementById('akadInfo').innerHTML =
+    fmtDate(d.akadDate) + (d.akadTime?' · '+fmtTime(d.akadTime):'') + (d.akadPlace?'<br>'+f(d.akadPlace):'');
+}
+if (d.resepsiDate || d.resepsiPlace) {
+  document.getElementById('resepsiInfo').innerHTML =
+    fmtDate(d.resepsiDate) + (d.resepsiTime?' · '+fmtTime(d.resepsiTime):'') + (d.resepsiPlace?'<br>'+f(d.resepsiPlace):'');
+}
+if (d.mapsUrl) {
+  const ml = document.getElementById('mapsLink');
+  ml.href = d.mapsUrl;
+  ml.style.display = 'inline-flex';
+}
+
+// Gallery
+if (d.gallery && d.gallery.length > 0) {
+  const grid = document.getElementById('galGrid');
+  d.gallery.forEach((src, i) => {
+    if (!src) return;
+    const img = document.createElement('img');
+    img.src     = src;
+    img.alt     = `Galeri ${i+1}`;
+    img.loading = 'lazy';
+    grid.appendChild(img);
+  });
+  document.getElementById('galSec').style.display = '';
+}
+
+// Closing
+if (d.closingMessage) document.getElementById('closingMsg').textContent = d.closingMessage;
+if (d.groomNickname && d.brideNickname)
+  document.getElementById('footerNames').innerHTML = d.groomNickname + ' &amp; ' + d.brideNickname;
+
+// ── COUNTDOWN ──
+const targetStr = d.resepsiDate
+  ? `${d.resepsiDate}T${d.resepsiTime||'09:00'}:00`
+  : '2026-12-20T09:00:00';
+const target = new Date(targetStr).getTime();
+setInterval(() => {
+  const diff = target - Date.now();
+  if(diff < 0){
+    ['cD','cH','cM','cS'].forEach(id => document.getElementById(id).textContent = '0');
+    return;
+  }
+  document.getElementById('cD').textContent = Math.floor(diff/86400000);
+  document.getElementById('cH').textContent = Math.floor((diff%86400000)/3600000);
+  document.getElementById('cM').textContent = Math.floor((diff%3600000)/60000);
+  document.getElementById('cS').textContent = Math.floor((diff%60000)/1000);
+}, 1000);
+
+// ── MUSIC ──
+const audio    = document.getElementById('bgAudio');
+const musicBtn = document.getElementById('musicBtn');
+let   musicPlaying = false;
+
+function initMusic() {
+  const url = d.musicUrl && d.musicUrl.trim();
+  if (!url) return;
+
+  audio.src = url;
+  musicBtn.style.display = 'flex';
+
+  // Attempt autoplay — triggered by user gesture (openInv button click)
+  // This is allowed on mobile because it's inside a user interaction handler
+  const p = audio.play();
+  if (p !== undefined) {
+    p.then(() => {
+      musicPlaying = true;
+      musicBtn.classList.add('playing');
+      musicBtn.textContent = '🎵';
+    }).catch(() => {
+      // Still blocked (some browsers require direct interaction)
       musicPlaying = false;
-      musicBtn.classList.remove('playing');
       musicBtn.textContent = '▶';
-    } else {
-      audio.play().then(() => {
-        musicPlaying = true;
-        musicBtn.classList.add('playing');
-        musicBtn.textContent = '🎵';
-      }).catch(e => console.warn('Music play failed:', e));
-    }
-  }
-
-  // ── WISHES ──
-  // Wishes stored locally per device (can't be shared via URL due to size)
-  const wishKey = 'weddingWishes_' + (d.groomNickname || '') + '_' + (d.brideNickname || '');
-  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function loadWishes() {
-    const list = document.getElementById('wishList'); list.innerHTML = '';
-    const ws = JSON.parse(localStorage.getItem(wishKey) || '[]');
-    [...ws].reverse().forEach(w => {
-      const el = document.createElement('div'); el.className = 'wish-item';
-      el.innerHTML = `<div class="wn">${escHtml(w.name)}</div><div class="wm">${escHtml(w.msg)}</div>`;
-      list.appendChild(el);
+      musicBtn.title = 'Putar Musik';
     });
   }
-  function submitWish() {
-    const name = document.getElementById('wName').value.trim();
-    const msg = document.getElementById('wMsg').value.trim();
-    if (!name || !msg) { alert('Nama dan ucapan wajib diisi.'); return; }
-    const ws = JSON.parse(localStorage.getItem(wishKey) || '[]');
-    ws.push({name, msg, ts: Date.now()});
-    localStorage.setItem(wishKey, JSON.stringify(ws));
-    document.getElementById('wName').value = '';
-    document.getElementById('wMsg').value = '';
-    loadWishes();
+}
+
+function toggleMusic() {
+  if (musicPlaying) {
+    audio.pause();
+    musicPlaying = false;
+    musicBtn.classList.remove('playing');
+    musicBtn.textContent = '▶';
+  } else {
+    audio.play().then(() => {
+      musicPlaying = true;
+      musicBtn.classList.add('playing');
+      musicBtn.textContent = '🎵';
+    }).catch(e => console.warn('play failed:', e));
   }
+}
+
+// ── WISHES ──
+const wishKey = 'wishes_' + (d.groomNickname||'g') + '_' + (d.brideNickname||'b');
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function loadWishes(){
+  const list = document.getElementById('wishList');
+  list.innerHTML = '';
+  const ws = JSON.parse(localStorage.getItem(wishKey)||'[]');
+  [...ws].reverse().forEach(w => {
+    const el = document.createElement('div');
+    el.className = 'wish-item';
+    el.innerHTML = `<div class="wn">${esc(w.name)}</div><div class="wm">${esc(w.msg)}</div>`;
+    list.appendChild(el);
+  });
+}
+
+function submitWish(){
+  const name = document.getElementById('wName').value.trim();
+  const msg  = document.getElementById('wMsg').value.trim();
+  if(!name||!msg){ alert('Nama dan ucapan wajib diisi.'); return; }
+  const ws = JSON.parse(localStorage.getItem(wishKey)||'[]');
+  ws.push({name, msg, ts: Date.now()});
+  localStorage.setItem(wishKey, JSON.stringify(ws));
+  document.getElementById('wName').value = '';
+  document.getElementById('wMsg').value  = '';
   loadWishes();
+}
+loadWishes();
 
-  // ── OPEN INVITATION ──
-  function openInv() {
-    const cover = document.getElementById('cover');
-    cover.style.transition = 'opacity .55s ease';
-    cover.style.opacity = '0';
-    setTimeout(() => {
-      cover.style.display = 'none';
-      document.getElementById('main').style.display = 'block';
-      initMusic();
-      setTimeout(observeFade, 60);
-    }, 550);
-  }
+// ── OPEN INVITATION ──
+// This MUST be triggered by user gesture so autoplay works on mobile
+function openInv() {
+  const cover = document.getElementById('cover');
+  cover.style.transition = 'opacity .55s ease';
+  cover.style.opacity    = '0';
+  setTimeout(() => {
+    cover.style.display                       = 'none';
+    document.getElementById('main').style.display = 'block';
+    initMusic(); // Called inside user gesture → autoplay allowed
+    setTimeout(observeFade, 60);
+  }, 550);
+}
 
-  // ── SCROLL FADE ──
-  function observeFade() {
-    const els = document.querySelectorAll('.fade-in');
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-      });
-    }, {threshold: .1});
-    els.forEach(el => obs.observe(el));
-  }
+// ── SCROLL FADE ──
+function observeFade(){
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  },{threshold:.1});
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+}
 </script>
 </body>
 </html>
